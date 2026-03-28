@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import ChartDBLogo from '@/assets/logo-light.png';
 import ChartDBDarkLogo from '@/assets/logo-dark.png';
 import { useTheme } from '@/hooks/use-theme';
@@ -15,7 +16,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = () => {
     const renderStars = useCallback(() => {
         return (
             <iframe
-                src={`https://ghbtns.com/github-btn.html?user=chartdb&repo=chartdb&type=star&size=large&text=false`}
+                src={`https://ghbtns.com/github-btn.html?user=agafonovim&repo=schema-viewer&type=star&size=large&text=false`}
                 width="40"
                 height="30"
                 title="GitHub"
@@ -27,11 +28,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = () => {
         <nav className="flex flex-col justify-between border-b px-3 md:h-12 md:flex-row md:items-center md:px-4">
             <div className="flex flex-1 flex-col justify-between gap-x-1 md:flex-row md:justify-normal">
                 <div className="flex items-center justify-between pt-[8px] font-primary md:py-[10px]">
-                    <a
-                        href="https://chartdb.io"
-                        className="cursor-pointer"
-                        rel="noreferrer"
-                    >
+                    <Link to="/" className="cursor-pointer">
                         <img
                             src={
                                 effectiveTheme === 'light'
@@ -41,15 +38,28 @@ export const TopNavbar: React.FC<TopNavbarProps> = () => {
                             alt="chartDB"
                             className="h-4 max-w-fit"
                         />
-                    </a>
+                    </Link>
                 </div>
                 <Menu />
             </div>
             <DiagramName />
-            <div className="hidden flex-1 items-center justify-end gap-2 sm:flex">
+            <div className="flex flex-1 items-center justify-end gap-2">
                 <LastSaved />
-                {renderStars()}
-                <LanguageNav />
+                <a
+                    href="https://payload.market"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                >
+                    <span className="font-medium">payload.market</span>
+                    <span className="hidden text-muted-foreground/60 xl:inline">
+                        — Payload CMS marketplace
+                    </span>
+                </a>
+                <div className="hidden sm:flex sm:items-center sm:gap-2">
+                    {renderStars()}
+                    <LanguageNav />
+                </div>
             </div>
         </nav>
     );

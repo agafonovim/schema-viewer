@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import ChartDBLogo from '@/assets/logo-light.png';
 import ChartDBDarkLogo from '@/assets/logo-dark.png';
 import type { Example } from './examples-data/examples-data';
@@ -57,11 +58,7 @@ const ExamplesPageComponent: React.FC = () => {
                 <nav className="flex h-12 flex-row items-center justify-between border-b px-4">
                     <div className="flex flex-1 justify-start gap-x-3">
                         <div className="flex items-center font-primary">
-                            <a
-                                href="https://chartdb.io"
-                                className="cursor-pointer"
-                                rel="noreferrer"
-                            >
+                            <Link to="/" className="cursor-pointer">
                                 <img
                                     src={
                                         effectiveTheme === 'light'
@@ -71,7 +68,7 @@ const ExamplesPageComponent: React.FC = () => {
                                     alt="chartDB"
                                     className="h-4 max-w-fit"
                                 />
-                            </a>
+                            </Link>
                         </div>
                     </div>
                     <div className="group flex flex-1 flex-row items-center justify-center"></div>

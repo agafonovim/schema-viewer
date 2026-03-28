@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import ChartDBLogo from '@/assets/logo-light.png';
 import ChartDBDarkLogo from '@/assets/logo-dark.png';
 import { useTheme } from '@/hooks/use-theme';
@@ -41,11 +42,7 @@ const TemplatesPageComponent: React.FC = () => {
                 <nav className="flex h-12 shrink-0 flex-row items-center justify-between border-b px-4">
                     <div className="flex flex-1 justify-start gap-x-3">
                         <div className="flex items-center font-primary">
-                            <a
-                                href="https://chartdb.io"
-                                className="cursor-pointer"
-                                rel="noreferrer"
-                            >
+                            <Link to="/" className="cursor-pointer">
                                 <img
                                     src={
                                         effectiveTheme === 'light'
@@ -55,12 +52,12 @@ const TemplatesPageComponent: React.FC = () => {
                                     alt="chartDB"
                                     className="h-4 max-w-fit"
                                 />
-                            </a>
+                            </Link>
                         </div>
                     </div>
                     <div className="flex flex-1 justify-end">
                         <iframe
-                            src={`https://ghbtns.com/github-btn.html?user=chartdb&repo=chartdb&type=star&size=large&text=false`}
+                            src={`https://ghbtns.com/github-btn.html?user=agafonovim&repo=schema-viewer&type=star&size=large&text=false`}
                             width="40"
                             height="30"
                             title="GitHub"

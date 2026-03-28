@@ -1,0 +1,151 @@
+# Deploy PR preview (viewer + schemas) to GitHub Pages and post links.
+# Each PR gets its own directory on gh-pages branch.
+# On PR close, the preview directory is cleaned up.
+#
+# Preview at: https://<user>.github.io/<repo>/pr-<number>-<sha>/viewer/
+#
+# Prerequisites:
+#   Settings → Pages → Source → Deploy from a branch → gh-pages
+
+name: Schema PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  preview-deploy:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Compute hash
+        id: hash
+        run: echo "value=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare preview site
+        run: |
+          mkdir -p site
+          cp -r schemas/ site/schemas/
+          cp index.html site/index.html 2>/dev/null || true
+
+      - uses: agafonovim/schema-viewer@v1
+        with:
+          path: site/viewer
+
+      - name: Deploy preview to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          destination_dir: pr-${{ github.event.number }}-${{ steps.hash.outputs.value }}
+          keep_files: true
+
+      - name: Find changed schema files
+        id: changed
+        run: |
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'schemas/' | tr '\n' ',')
+          echo "files=${FILES}" >> "$GITHUB_OUTPUT"
+
+      - name: Clean old previews and post comment
+        uses: actions/github-script@v8
+        env:
+          DOCS_HASH: ${{ steps.hash.outputs.value }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const number = context.issue.number;
+            const hash = process.env.DOCS_HASH;
+            const prefix = `pr-${number}-`;
+
+            // Clean up old preview directories via Git Data API
+            try {
+              const { data: ref } = await github.rest.git.getRef({ owner, repo, ref: 'heads/gh-pages' });
+              const { data: commit } = await github.rest.git.getCommit({ owner, repo, commit_sha: ref.object.sha });
+              const { data: tree } = await github.rest.git.getTree({ owner, repo, tree_sha: commit.tree.sha, recursive: 'true' });
+
+              const oldPaths = tree.tree
+                .filter(item => item.path.startsWith(prefix) && !item.path.startsWith(`${prefix}${hash}`))
+                .map(item => item.path);
+
+              if (oldPaths.length > 0) {
+                const newTreeItems = oldPaths.map(path => ({ path, mode: '100644', type: 'blob', sha: null }));
+                const { data: newTree } = await github.rest.git.createTree({ owner, repo, base_tree: commit.tree.sha, tree: newTreeItems });
+                const { data: newCommit } = await github.rest.git.createCommit({
+                  owner, repo,
+                  message: `chore: clean old schema previews for PR #${number}`,
+                  tree: newTree.sha,
+                  parents: [ref.object.sha],
+                });
+                await github.rest.git.updateRef({ owner, repo, ref: 'heads/gh-pages', sha: newCommit.sha });
+              }
+            } catch (e) {
+              core.warning(`Failed to clean old previews: ${e.message}`);
+            }
+
+            // Build comment with viewer links
+            const pagesBase = `https://${owner}.github.io/${repo}`;
+            const previewBase = `${pagesBase}/${prefix}${hash}`;
+            const viewerUrl = `${previewBase}/viewer`;
+            const marker = '<!-- schema-viewer-links -->';
+            const formatMap = { dbml: 'dbml', sql: 'ddl', json: 'query' };
+
+            const changedFiles = '${{ steps.changed.outputs.files }}'.split(',').filter(Boolean);
+
+            const makeLink = (file) => {
+              const name = file.replace('schemas/', '');
+              const ext = name.split('.').pop();
+              const format = formatMap[ext] || '';
+              const src = `${previewBase}/schemas/${name}`;
+              let params = `src=${src}`;
+              if (format) params += `&format=${format}`;
+              return `- [${name}](${viewerUrl}/#/?${params})`;
+            };
+
+            const lines = [marker, '### Schema Viewer Links', ''];
+
+            if (changedFiles.length > 0) {
+              lines.push('Changed schemas in this PR:', '');
+              changedFiles.forEach(f => lines.push(makeLink(f)));
+            } else {
+              lines.push('No schema files changed in this PR.');
+            }
+
+            const body = lines.join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: number });
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              (c.body.includes(marker) || c.body.includes('Schema Viewer Links'))
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
+            }
+
+  preview-cleanup:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+
+      - name: Remove preview directory
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git rm -rf --ignore-unmatch "pr-${{ github.event.number }}-*"
+          git diff --cached --quiet || git commit -m "chore: remove PR #${{ github.event.number }} schema preview"
+          git push

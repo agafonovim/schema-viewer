@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@/components/link/link';
+import { Link } from 'react-router-dom';
 import { LayoutGrid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +9,7 @@ export const ExampleOption: React.FC<ExampleOptionProps> = () => {
     const { t } = useTranslation();
     return (
         <Link
-            href="/examples"
+            to="/examples"
             className="col-span-3 text-primary hover:text-primary"
         >
             <div className="flex h-8 w-full cursor-pointer flex-row items-center justify-center gap-2 rounded-md border py-3 text-center">

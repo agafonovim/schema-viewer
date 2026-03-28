@@ -6,7 +6,7 @@ import { LocalConfigProvider } from '@/context/local-config-context/local-config
 import { ThemeProvider } from '@/context/theme-context/theme-provider';
 import { Button } from '@/components/button/button';
 import { CloudDownload } from 'lucide-react';
-import { useLoaderData, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate, useParams } from 'react-router-dom';
 import type { Template } from '../../templates-data/templates-data';
 import {
     Breadcrumb,
@@ -32,7 +32,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { ChartDBProvider } from '@/context/chartdb-context/chartdb-provider';
 import { Helmet } from 'react-helmet-async';
 import { APP_URL, HOST_URL } from '@/lib/env';
-import { Link } from '@/components/link/link';
+import { Link as ExternalLink } from '@/components/link/link';
 
 export interface TemplatePageLoaderData {
     template: Template | undefined;
@@ -125,11 +125,7 @@ const TemplatePageComponent: React.FC = () => {
                 <nav className="flex h-12 shrink-0 flex-row items-center justify-between border-b px-4">
                     <div className="flex flex-1 justify-start gap-x-3">
                         <div className="flex items-center font-primary">
-                            <a
-                                href="https://chartdb.io"
-                                className="cursor-pointer"
-                                rel="noreferrer"
-                            >
+                            <Link to="/" className="cursor-pointer">
                                 <img
                                     src={
                                         effectiveTheme === 'light'
@@ -139,12 +135,12 @@ const TemplatePageComponent: React.FC = () => {
                                     alt="chartDB"
                                     className="h-4 max-w-fit"
                                 />
-                            </a>
+                            </Link>
                         </div>
                     </div>
                     <div className="flex flex-1 justify-end">
                         <iframe
-                            src={`https://ghbtns.com/github-btn.html?user=chartdb&repo=chartdb&type=star&size=large&text=false`}
+                            src={`https://ghbtns.com/github-btn.html?user=agafonovim&repo=schema-viewer&type=star&size=large&text=false`}
                             width="40"
                             height="30"
                             title="GitHub"
@@ -255,13 +251,13 @@ const TemplatePageComponent: React.FC = () => {
                                                 Url
                                             </h4>
 
-                                            <Link
+                                            <ExternalLink
                                                 className="break-all text-sm text-muted-foreground"
                                                 href={`${template.url}?ref=chartdb`}
                                                 target="_blank"
                                             >
                                                 {template.url}
-                                            </Link>
+                                            </ExternalLink>
                                         </div>
                                         <Separator />
                                     </>

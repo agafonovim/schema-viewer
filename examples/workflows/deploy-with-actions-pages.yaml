@@ -1,0 +1,48 @@
+# Deploy Schema Viewer using GitHub's native Pages deployment.
+# Alternative to peaceiris/actions-gh-pages — no gh-pages branch needed.
+#
+# Prerequisites:
+#   Settings → Pages → Source → GitHub Actions
+
+name: Deploy Schema Viewer
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Prepare site
+        run: |
+          mkdir -p site
+          cp -r schemas/ site/schemas/
+          cp index.html site/index.html 2>/dev/null || true
+
+      - uses: agafonovim/schema-viewer@v1
+        with:
+          path: site/viewer
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

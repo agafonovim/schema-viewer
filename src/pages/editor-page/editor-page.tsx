@@ -22,6 +22,7 @@ import { Helmet } from 'react-helmet-async';
 import { AlertProvider } from '@/context/alert-context/alert-provider';
 import { CanvasProvider } from '@/context/canvas-context/canvas-provider';
 import { HIDE_CHARTDB_CLOUD } from '@/lib/env';
+import { useUrlImportLoader } from './use-url-import-loader';
 import { useDiagramLoader } from './use-diagram-loader';
 import { DiffProvider } from '@/context/diff-context/diff-provider';
 import { TopNavbarMock } from './top-navbar/top-navbar-mock';
@@ -44,7 +45,8 @@ const EditorPageComponent: React.FC = () => {
     const { isMd: isDesktop } = useBreakpoint('md');
     const { starUsDialogLastOpen, setStarUsDialogLastOpen, githubRepoOpened } =
         useLocalConfig();
-    const { initialDiagram } = useDiagramLoader();
+    const { isUrlImportLoad } = useUrlImportLoader();
+    const { initialDiagram } = useDiagramLoader({ skip: isUrlImportLoad });
 
     useEffect(() => {
         if (HIDE_CHARTDB_CLOUD) {

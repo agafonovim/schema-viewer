@@ -1,171 +1,173 @@
-<h1 align="center">
-  <a href="https://chartdb.io#gh-light-mode-only">
-    <img src="https://github.com/chartdb/chartdb/blob/main/src/assets/logo-light.png" width="400" height="70" alt="ChartDB">
-  </a>
-  <a href="https://chartdb.io##gh-dark-mode-only">
-    <img src="https://github.com/chartdb/chartdb/blob/main/src/assets/logo-dark.png" width="400" height="70" alt="ChartDB">
-  </a>
-  <br>
-</h1>
+# Schema Viewer
 
-<p align="center">
-  <b>Open-source database diagrams editor</b> <br />
-  <b>No installations • No Database password required.</b> <br />
-</p>
+> Open-source database schema visualizer. Forked from [ChartDB](https://github.com/chartdb/chartdb).
+> Built by [payload.market](https://payload.market) — a marketplace for Payload CMS.
 
-<h3 align="center">
-  <a href="https://discord.gg/QeFwyWSKwC">Community</a>  &bull;
-  <a href="https://www.chartdb.io?ref=github_readme">Website</a>  &bull;
-  <a href="https://chartdb.io/templates?ref=github_readme">Examples</a>  &bull;
-  <a href="https://app.chartdb.io?ref=github_readme">Demo</a>
-</h3>
+Import schemas from DBML, DDL, or SQL query results. Open any schema by URL with a single link. Deploy to GitHub Pages in one step. No installations, no database password required.
 
-<h4 align="center">
-  <a href="https://github.com/chartdb/chartdb?tab=AGPL-3.0-1-ov-file#readme">
-    <img src="https://img.shields.io/github/license/chartdb/chartdb?color=blue" alt="ChartDB is released under the AGPL license." />
-  </a>
-  <a href="https://github.com/chartdb/chartdb/blob/main/CONTRIBUTING.md">
-    <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen" alt="PRs welcome!" />
-  </a>
-  <a href="https://discord.gg/QeFwyWSKwC">
-    <img src="https://img.shields.io/discord/1277047413705670678?color=5865F2&label=Discord&logo=discord&logoColor=white" alt="Discord community channel" />
-  </a>
-  <a href="https://x.com/intent/follow?screen_name=jonathanfishner">
-    <img src="https://img.shields.io/twitter/follow/jonathanfishner?style=social"/>
-  </a>
-
-</h4>
-
----
-
-<p align="center">
-  <img width='700px' src="./public/chartdb.png">
-</p>
-
-### 🎉 ChartDB
-
-ChartDB is a powerful, web-based database diagramming editor.
-Instantly visualize your database schema with a single **"Smart Query."** Customize diagrams, export SQL scripts, and access all features—no account required. Experience seamless database design here.
-
-**What it does**:
-
-- **Instant Schema Import**
-  Run a single query to instantly retrieve your database schema as JSON. This makes it incredibly fast to visualize your database schema, whether for documentation, team discussions, or simply understanding your data better.
-
-- **AI-Powered Export for Easy Migration**
-  Our AI-driven export feature allows you to generate the DDL script in the dialect of your choice. Whether you're migrating from MySQL to PostgreSQL or from SQLite to MariaDB, ChartDB simplifies the process by providing the necessary scripts tailored to your target database.
-- **Interactive Editing**
-  Fine-tune your database schema using our intuitive editor. Easily make adjustments or annotations to better visualize complex structures.
-
-### Status
-
-ChartDB is currently in Public Beta. Star and watch this repository to get notified of updates.
+**Live Demo:**
+[Blog](https://agafonovim.github.io/schema-viewer/#/?src=https://raw.githubusercontent.com/agafonovim/schema-viewer/main/public/examples/blog.dbml&format=dbml) |
+[E-commerce · PostgreSQL](https://agafonovim.github.io/schema-viewer/#/?src=https://raw.githubusercontent.com/agafonovim/schema-viewer/main/public/examples/ecommerce.sql&format=ddl&db=postgresql) |
+[SaaS · MySQL](https://agafonovim.github.io/schema-viewer/#/?src=https://raw.githubusercontent.com/agafonovim/schema-viewer/main/public/examples/saas.sql&format=ddl&db=mysql)
 
 ### Supported Databases
 
-- ✅ PostgreSQL (<img src="./src/assets/postgresql_logo_2.png" width="15"/> + <img src="./src/assets/supabase.png" alt="Supabase" width="15"/> + <img src="./src/assets/timescale.png" alt="Timescale" width="15"/> )
-- ✅ MySQL
-- ✅ SQL Server
-- ✅ MariaDB
-- ✅ SQLite (<img src="./src/assets/sqlite_logo_2.png" width="15"/> + <img src="./src/assets/cloudflare_d1.png" alt="Cloudflare D1" width="15"/> Cloudflare D1)
-- ✅ CockroachDB
-- ✅ ClickHouse
+- PostgreSQL (+ Supabase, Timescale)
+- MySQL
+- SQL Server
+- MariaDB
+- SQLite (+ Cloudflare D1)
+- CockroachDB
+- ClickHouse
 
-## Getting Started
+## Features (added in this fork)
 
-Use the [cloud version](https://app.chartdb.io?ref=github_readme_2) or deploy locally:
+- **GitHub Action** — deploy a pre-built schema viewer to your GitHub Pages in one step
+- **URL import** — load a diagram from a remote URL via `?src=` query parameter
+- **Static hosting support** — hash router and relative paths for GitHub Pages, Netlify, etc.
 
-### How To Use
+## GitHub Action
 
-```bash
-npm install
-npm run dev
+The action downloads a pre-built viewer into a directory. You control deploy in your own workflow.
+
+> **Prerequisites:** Settings → Pages → Source → **Deploy from a branch** → `gh-pages`
+
+### Minimal example
+
+```yaml
+name: Deploy Schema Viewer
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: agafonovim/schema-viewer@v1
+        with:
+          path: site
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
 ```
 
-### Build
+After deployment, the viewer will be available at `https://<user>.github.io/<repo>/`.
 
-```bash
-npm install
-npm run build
+### Deploy alongside your own files
+
+```yaml
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Prepare site
+        run: |
+          mkdir -p site
+          cp -r schemas/ site/schemas/
+          cp index.html site/index.html 2>/dev/null || true
+
+      - uses: agafonovim/schema-viewer@v1
+        with:
+          path: site/viewer
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          keep_files: true
 ```
 
-Or like this if you want to have AI capabilities:
+After deployment:
+- Viewer: `https://<user>.github.io/<repo>/viewer/`
+- Schema link: `https://<user>.github.io/<repo>/viewer/#/?src=https://<user>.github.io/<repo>/schemas/my-schema.sql&format=ddl&db=postgresql`
 
-```bash
-npm install
-VITE_OPENAI_API_KEY=<YOUR_OPEN_AI_KEY> npm run build
+### Action inputs
+
+| Input  | Description                                          | Required |
+|--------|------------------------------------------------------|----------|
+| `path` | Directory to extract the viewer into                 | yes      |
+
+### PR preview with schema links
+
+Deploy a per-PR preview and post clickable viewer links as a comment. Old previews are cleaned up automatically when the PR is closed.
+
+See [pr-schema-preview.yaml](examples/workflows/pr-schema-preview.yaml) for the full workflow.
+
+### Example workflows
+
+See [examples/workflows/](examples/workflows/) for ready-to-use workflow files:
+
+| Workflow | Description |
+|----------|-------------|
+| [deploy-viewer-only.yaml](examples/workflows/deploy-viewer-only.yaml) | Deploy just the viewer to GitHub Pages |
+| [deploy-with-schemas.yaml](examples/workflows/deploy-with-schemas.yaml) | Deploy viewer alongside your schema files |
+| [deploy-on-release.yaml](examples/workflows/deploy-on-release.yaml) | Deploy only on version tags |
+| [pr-schema-preview.yaml](examples/workflows/pr-schema-preview.yaml) | Per-PR preview with viewer links in comments |
+| [deploy-with-actions-pages.yaml](examples/workflows/deploy-with-actions-pages.yaml) | Deploy using `actions/deploy-pages` (Pages source: GitHub Actions) |
+
+## URL Import
+
+Load a diagram by passing a URL to a schema file via the `src` query parameter:
+
+```
+https://<user>.github.io/<repo>/#/?src=https://example.com/schema.json
 ```
 
-### Run the Docker Container
+### Query parameters
 
-```bash
-docker run -e OPENAI_API_KEY=<YOUR_OPEN_AI_KEY> -p 8080:80 ghcr.io/chartdb/chartdb:latest
+| Parameter | Description | Values | Default |
+|-----------|-------------|--------|---------|
+| `src` | URL to fetch the schema from | Any HTTP/HTTPS URL | |
+| `format` | Import format of the file | `dbml`, `ddl`, `query` | auto-detect |
+| `db` | Target database type (used with `ddl` or `query`) | `generic`, `postgresql`, `mysql`, `sql_server`, `mariadb`, `sqlite`, `clickhouse`, `cockroachdb`, `oracle` | `generic` |
+
+### Examples
+
+#### Open a file from this repository
+
+Use `raw.githubusercontent.com` to link directly to schema files in public repositories:
+
+```
+https://agafonovim.github.io/schema-viewer/#/?src=https://raw.githubusercontent.com/agafonovim/schema-viewer/main/public/examples/blog.dbml&format=dbml
 ```
 
-#### Build and Run locally
+General pattern:
 
-```bash
-docker build -t chartdb .
-docker run -e OPENAI_API_KEY=<YOUR_OPEN_AI_KEY> -p 8080:80 chartdb
+```
+https://agafonovim.github.io/schema-viewer/#/?src=https://raw.githubusercontent.com/<user>/<repo>/<branch>/path/to/schema.dbml&format=dbml
 ```
 
-#### Using Custom Inference Server
+#### Format examples
 
-```bash
-# Build
-docker build \
-  --build-arg VITE_OPENAI_API_ENDPOINT=<YOUR_ENDPOINT> \
-  --build-arg VITE_LLM_MODEL_NAME=<YOUR_MODEL_NAME> \
-  -t chartdb .
+Import a DBML file:
 
-# Run
-docker run \
-  -e OPENAI_API_ENDPOINT=<YOUR_ENDPOINT> \
-  -e LLM_MODEL_NAME=<YOUR_MODEL_NAME> \
-  -p 8080:80 chartdb
+```
+#/?src=https://example.com/schema.dbml&format=dbml
 ```
 
-> **Privacy Note:** ChartDB includes privacy-focused analytics via Fathom Analytics. You can disable this by adding `-e DISABLE_ANALYTICS=true` to the run command or `--build-arg VITE_DISABLE_ANALYTICS=true` when building.
+Import a PostgreSQL DDL:
 
-> **Note:** You must configure either Option 1 (OpenAI API key) OR Option 2 (Custom endpoint and model name) for AI capabilities to work. Do not mix the two options.
-
-Open your browser and navigate to `http://localhost:8080`.
-
-Example configuration for a local vLLM server:
-
-```bash
-VITE_OPENAI_API_ENDPOINT=http://localhost:8000/v1
-VITE_LLM_MODEL_NAME=Qwen/Qwen2.5-32B-Instruct-AWQ
+```
+#/?src=https://example.com/schema.sql&format=ddl&db=postgresql
 ```
 
-## Try it on our website
+Import a query result (JSON):
 
-1. Go to [ChartDB.io](https://chartdb.io?ref=github_readme_2)
-2. Click "Go to app"
-3. Choose the database that you are using.
-4. Take the magic query and run it in your database.
-5. Copy and paste the resulting JSON set into ChartDB.
-6. Enjoy Viewing & Editing!
+```
+#/?src=https://example.com/schema.json&format=query&db=mysql
+```
 
-## 💚 Community & Support
+## Upstream
 
-- [Discord](https://discord.gg/QeFwyWSKwC) (For live discussion with the community and the ChartDB team)
-- [GitHub Issues](https://github.com/chartdb/chartdb/issues) (For any bugs and errors you encounter using ChartDB)
-- [Twitter](https://x.com/intent/follow?screen_name=jonathanfishner) (Get news fast)
-
-## Contributing
-
-We welcome community contributions, big or small, and are here to guide you along
-the way. Message us in the [ChartDB Community Discord](https://discord.gg/QeFwyWSKwC).
-
-For more information on how to contribute, please see our
-[Contributing Guide](/CONTRIBUTING.md).
-
-This project is released with a [Contributor Code of Conduct](/CODE_OF_CONDUCT.md).
-By participating in this project, you agree to follow its terms.
-
-Thank you for helping us make ChartDB better for everyone :heart:.
+This is a fork of [ChartDB](https://github.com/chartdb/chartdb). Upstream changes are synced daily via automated workflow.
 
 ## License
 
-ChartDB is licensed under the [GNU Affero General Public License v3.0](LICENSE)
+Licensed under the [GNU Affero General Public License v3.0](LICENSE).

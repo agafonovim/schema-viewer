@@ -1,0 +1,21 @@
+name: 'Schema Viewer'
+description: 'Database schema viewer for GitHub Pages. Supports DBML, DDL, JSON. Deploy standalone or alongside other content.'
+branding:
+  icon: 'database'
+  color: 'blue'
+
+inputs:
+  path:
+    description: 'Directory to extract the viewer into (e.g. "site", "site/viewer").'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Download Schema Viewer
+      shell: bash
+      run: |
+        VERSION=$(grep -o '"version": *"[^"]*"' "${{ github.action_path }}/package.json" | head -1 | grep -o '[0-9][^"]*')
+        TARGET="${{ inputs.path }}"
+        mkdir -p "$TARGET"
+        curl -fsSL "https://github.com/agafonovim/schema-viewer/releases/download/v${VERSION}/dist.tar.gz" | tar -xz -C "$TARGET"

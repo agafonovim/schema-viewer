@@ -10,12 +10,63 @@ permissions:
   pull-requests: write
 
 jobs:
-  release:
+  release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
+      - name: Check for unresolved upstream sync
+        id: check_sync
+        run: |
+          COUNT=$(gh pr list --repo "$GITHUB_REPOSITORY" --label sync-upstream --state open --json id --jq 'length')
+          if [ "$COUNT" -gt 0 ]; then
+            echo "blocked=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::Release blocked — unresolved upstream sync PR"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+
       - name: release-please
+        if: steps.check_sync.outputs.blocked != 'true'
         id: release
         uses: googleapis/release-please-action@v4
         with:
           release-type: node
-          token: ${{ secrets.CHARTDB_OSS_RELEASE }}
+          token: ${{ secrets.RELEASE_PAT }}
+
+  build-dist:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_BASE_PATH: ./
+          VITE_HASH_ROUTER: 'true'
+          VITE_HIDE_CHARTDB_CLOUD: 'true'
+          VITE_DISABLE_ANALYTICS: 'true'
+
+      - name: Attach dist and update major tag
+        run: |
+          TAG="${{ needs.release-please.outputs.tag_name }}"
+          tar -czf dist.tar.gz -C dist .
+          gh release upload "$TAG" dist.tar.gz --clobber
+          MAJOR="${TAG%%.*}"
+          git tag -f "$MAJOR" "$TAG"
+          git push origin "$MAJOR" --force
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}

@@ -1,0 +1,40 @@
+# Deploy Schema Viewer on new releases only.
+# Useful when you want to update the viewer and schemas
+# only when cutting a new version of your project.
+#
+# Prerequisites:
+#   Settings → Pages → Source → Deploy from a branch → gh-pages
+
+name: Deploy Schema Viewer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Prepare site
+        run: |
+          mkdir -p site
+          cp -r schemas/ site/schemas/
+          cp index.html site/index.html 2>/dev/null || true
+
+      - uses: agafonovim/schema-viewer@v1
+        with:
+          path: site/viewer
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          keep_files: true

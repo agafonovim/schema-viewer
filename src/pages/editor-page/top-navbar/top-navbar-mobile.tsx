@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import ChartDBLogo from '@/assets/logo-2.png';
 import { DiagramName } from './diagram-name';
 import { LanguageNav } from './language-nav/language-nav';
@@ -13,7 +14,7 @@ export const TopNavbarMobile: React.FC<TopNavbarMobileProps> = () => {
     const renderStars = useCallback(() => {
         return (
             <iframe
-                src="https://ghbtns.com/github-btn.html?user=chartdb&repo=chartdb&type=star&size=small&text=false"
+                src="https://ghbtns.com/github-btn.html?user=agafonovim&repo=schema-viewer&type=star&size=small&text=false"
                 width="25"
                 height="20"
                 title="GitHub"
@@ -35,20 +36,24 @@ export const TopNavbarMobile: React.FC<TopNavbarMobileProps> = () => {
                         >
                             <MenuIcon className="size-5" />
                         </Button>
-                        <a
-                            href="https://chartdb.io"
-                            className="cursor-pointer"
-                            rel="noreferrer"
-                        >
+                        <Link to="/" className="cursor-pointer">
                             <img
                                 src={ChartDBLogo}
                                 alt="chartDB"
                                 className="h-4 max-w-fit"
                             />
-                        </a>
+                        </Link>
                     </div>
 
                     <div className="flex items-center gap-2">
+                        <a
+                            href="https://payload.market"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                            payload.market
+                        </a>
                         {renderStars()}
                         <LanguageNav />
                     </div>

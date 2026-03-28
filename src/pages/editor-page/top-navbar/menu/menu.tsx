@@ -495,6 +495,18 @@ export const Menu: React.FC<MenuProps> = () => {
                     <MenubarItem onClick={openJoinDiscord}>
                         {t('menu.help.join_discord')}
                     </MenubarItem>
+                    <MenubarSeparator />
+                    <MenubarItem
+                        className="flex flex-col items-start gap-0.5 py-2"
+                        onClick={() =>
+                            window.open('https://payload.market', '_blank')
+                        }
+                    >
+                        <span>payload.market</span>
+                        <span className="text-[11px] font-normal text-muted-foreground">
+                            Plugins, templates &amp; tools for Payload CMS
+                        </span>
+                    </MenubarItem>
                 </MenubarContent>
             </MenubarMenu>
         </Menubar>

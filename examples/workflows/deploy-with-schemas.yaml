@@ -1,0 +1,43 @@
+# Deploy Schema Viewer alongside your schema files.
+#
+# Viewer at:  https://<user>.github.io/<repo>/viewer/
+# Schemas at: https://<user>.github.io/<repo>/schemas/
+#
+# Open a schema:
+#   https://<user>.github.io/<repo>/viewer/#/?src=https://<user>.github.io/<repo>/schemas/my-schema.sql&format=ddl&db=postgresql
+#
+# Prerequisites:
+#   Settings → Pages → Source → Deploy from a branch → gh-pages
+
+name: Deploy Schema Viewer
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Prepare site
+        run: |
+          mkdir -p site
+          cp -r schemas/ site/schemas/
+          cp index.html site/index.html 2>/dev/null || true
+
+      - uses: agafonovim/schema-viewer@v1
+        with:
+          path: site/viewer
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          keep_files: true

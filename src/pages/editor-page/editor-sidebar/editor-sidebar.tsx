@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import {
     Sidebar,
     SidebarContent,
@@ -177,11 +178,7 @@ export const EditorSidebar: React.FC<EditorSidebarProps> = () => {
         >
             {!isDesktop ? (
                 <SidebarHeader>
-                    <a
-                        href="https://chartdb.io"
-                        className="cursor-pointer"
-                        rel="noreferrer"
-                    >
+                    <Link to="/" className="cursor-pointer">
                         <img
                             src={
                                 effectiveTheme === 'light'
@@ -191,7 +188,7 @@ export const EditorSidebar: React.FC<EditorSidebarProps> = () => {
                             alt="chartDB"
                             className="h-4 max-w-fit"
                         />
-                    </a>
+                    </Link>
                 </SidebarHeader>
             ) : null}
             <SidebarContent>

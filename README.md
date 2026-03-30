@@ -1,7 +1,8 @@
 # Schema Viewer
 
 > Open-source database schema visualizer. Forked from [ChartDB](https://github.com/chartdb/chartdb).
-> Built by [payload.market](https://payload.market) — a marketplace for Payload CMS.
+> 
+> Created by @agafonovim for [payload.market](https://payload.market) — a marketplace for Payload CMS.
 
 Import schemas from DBML, DDL, or SQL query results. Open any schema by URL with a single link. Deploy to GitHub Pages in one step. No installations, no database password required.
 
